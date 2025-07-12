@@ -1,97 +1,115 @@
-// script.js
-//
-// // 1. Initialize the quotes array (from localStorage if available)
-// let quotes = JSON.parse(localStorage.getItem("quotes")) || [
+// Load quotes from localStorage or set default
+// let quotes = JSON.parse(localStorage.getItem('quotes')) || [
 //   { text: "The only way to do great work is to love what you do.", category: "Motivation" },
-//     { text: "Success is not final, failure is not fatal: it is the courage to continue that counts.", category: "Success" },
-//       { text: "In the middle of every difficulty lies opportunity.", category: "Wisdom" }
+//     { text: "Success is not final, failure is not fatal.", category: "Success" },
+//       { text: "In every difficulty lies opportunity.", category: "Wisdom" }
 //       ];
 //
-//       // 2. Display a random quote
+//       // Display a random quote
 //       function showRandomQuote() {
-//         const randomIndex = Math.floor(Math.random() * quotes.length);
-//           const quote = quotes[randomIndex];
+//         const category = localStorage.getItem("selectedCategory") || "all";
+//           const filtered = category === "all" ? quotes : quotes.filter(q => q.category === category);
+//             const randomQuote = filtered[Math.floor(Math.random() * filtered.length)];
 //
-//             document.getElementById("quoteDisplay").innerHTML = `
-//                 <blockquote>"${quote.text}"</blockquote>
-//                     <footer>- ${quote.category}</footer>
-//                       `;
+//               if (randomQuote) {
+//                   document.getElementById("quoteDisplay").innerHTML = `
+//                         <blockquote>"${randomQuote.text}"</blockquote>
+//                               <footer>- ${randomQuote.category}</footer>
+//                                   `;
+//                                       sessionStorage.setItem("lastQuote", JSON.stringify(randomQuote));
+//                                         }
+//                                         }
 //
-//                         // Save last shown quote to sessionStorage
-//                           sessionStorage.setItem("lastQuote", JSON.stringify(quote));
-//                           }
+//                                         // Add quote
+//                                         function addQuote() {
+//                                           const text = document.getElementById("newQuoteText").value.trim();
+//                                             const category = document.getElementById("newQuoteCategory").value.trim();
+//                                               if (!text || !category) return alert("Fill both fields.");
 //
-//                           // 3. Add new quote
-//                           function addQuote() {
-//                             const text = document.getElementById("newQuoteText").value.trim();
-//                               const category = document.getElementById("newQuoteCategory").value.trim();
+//                                                 quotes.push({ text, category });
+//                                                   saveQuotes();
+//                                                     populateCategories();
+//                                                       showRandomQuote();
 //
-//                                 if (text && category) {
-//                                     const newQuote = { text, category };
-//                                         quotes.push(newQuote);
-//                                             saveQuotes(); // Save to localStorage
+//                                                         document.getElementById("newQuoteText").value = "";
+//                                                           document.getElementById("newQuoteCategory").value = "";
+//                                                           }
 //
-//                                                 showRandomQuote();
+//                                                           // Save quotes to localStorage
+//                                                           function saveQuotes() {
+//                                                             localStorage.setItem("quotes", JSON.stringify(quotes));
+//                                                             }
 //
-//                                                     document.getElementById("newQuoteText").value = "";
-//                                                         document.getElementById("newQuoteCategory").value = "";
-//                                                           } else {
-//                                                               alert("Please enter both a quote and category.");
-//                                                                 }
-//                                                                 }
+//                                                             // Populate category dropdown
+//                                                             function populateCategories() {
+//                                                               const select = document.getElementById("categoryFilter");
+//                                                                 const uniqueCategories = [...new Set(quotes.map(q => q.category))];
 //
-//                                                                 // 4. Save quotes to localStorage
-//                                                                 function saveQuotes() {
-//                                                                   localStorage.setItem("quotes", JSON.stringify(quotes));
-//                                                                   }
+//                                                                   select.innerHTML = `<option value="all">All Categories</option>`;
+//                                                                     uniqueCategories.forEach(category => {
+//                                                                         const option = document.createElement("option");
+//                                                                             option.value = category;
+//                                                                                 option.textContent = category;
+//                                                                                     select.appendChild(option);
+//                                                                                       });
 //
-//                                                                   // 5. Import from JSON file
-//                                                                   function importFromJsonFile(event) {
-//                                                                     const fileReader = new FileReader();
-//                                                                       fileReader.onload = function (event) {
-//                                                                           try {
-//                                                                                 const importedQuotes = JSON.parse(event.target.result);
-//                                                                                       if (Array.isArray(importedQuotes)) {
-//                                                                                               quotes.push(...importedQuotes);
-//                                                                                                       saveQuotes();
-//                                                                                                               alert("Quotes imported successfully!");
-//                                                                                                                     } else {
-//                                                                                                                             alert("Invalid JSON format.");
-//                                                                                                                                   }
-//                                                                                                                                       } catch (e) {
-//                                                                                                                                             alert("Error parsing JSON file.");
-//                                                                                                                                                 }
-//                                                                                                                                                   };
-//                                                                                                                                                     fileReader.readAsText(event.target.files[0]);
-//                                                                                                                                                     }
+//                                                                                         const savedCategory = localStorage.getItem("selectedCategory") || "all";
+//                                                                                           select.value = savedCategory;
+//                                                                                           }
 //
-//                                                                                                                                                     // 6. Export to JSON file
-//                                                                                                                                                     function exportToJsonFile() {
-//                                                                                                                                                       const blob = new Blob([JSON.stringify(quotes, null, 2)], { type: "application/json" });
-//                                                                                                                                                         const url = URL.createObjectURL(blob);
+//                                                                                           // Filter quotes by category
+//                                                                                           function filterQuotes() {
+//                                                                                             const selectedCategory = document.getElementById("categoryFilter").value;
+//                                                                                               localStorage.setItem("selectedCategory", selectedCategory);
+//                                                                                                 showRandomQuote();
+//                                                                                                 }
 //
-//                                                                                                                                                           const link = document.createElement("a");
-//                                                                                                                                                             link.href = url;
-//                                                                                                                                                               link.download = "quotes.json";
-//                                                                                                                                                                 document.body.appendChild(link);
-//                                                                                                                                                                   link.click();
-//                                                                                                                                                                     document.body.removeChild(link);
-//                                                                                                                                                                     }
+//                                                                                                 // Export JSON
+//                                                                                                 function exportToJsonFile() {
+//                                                                                                   const blob = new Blob([JSON.stringify(quotes, null, 2)], { type: "application/json" });
+//                                                                                                     const link = document.createElement("a");
+//                                                                                                       link.href = URL.createObjectURL(blob);
+//                                                                                                         link.download = "quotes.json";
+//                                                                                                           document.body.appendChild(link);
+//                                                                                                             link.click();
+//                                                                                                               document.body.removeChild(link);
+//                                                                                                               }
 //
-//                                                                                                                                                                     // 7. Event listeners
-//                                                                                                                                                                     document.getElementById("newQuote").addEventListener("click", showRandomQuote);
+//                                                                                                               // Import JSON
+//                                                                                                               function importFromJsonFile(event) {
+//                                                                                                                 const reader = new FileReader();
+//                                                                                                                   reader.onload = function(e) {
+//                                                                                                                       try {
+//                                                                                                                             const imported = JSON.parse(e.target.result);
+//                                                                                                                                   if (Array.isArray(imported)) {
+//                                                                                                                                           quotes.push(...imported);
+//                                                                                                                                                   saveQuotes();
+//                                                                                                                                                           populateCategories();
+//                                                                                                                                                                   alert("Quotes imported!");
+//                                                                                                                                                                           showRandomQuote();
+//                                                                                                                                                                                 }
+//                                                                                                                                                                                     } catch (err) {
+//                                                                                                                                                                                           alert("Invalid JSON file.");
+//                                                                                                                                                                                               }
+//                                                                                                                                                                                                 };
+	//                                                                                                                                                                                                   reader.readAsText(event.target.files[0]);
+	//                                                                                                                                                                                                   }
 //
-//                                                                                                                                                                     // 8. Load last quote or show a random one
-//                                                                                                                                                                     window.onload = function () {
-//                                                                                                                                                                       const last = sessionStorage.getItem("lastQuote");
-//                                                                                                                                                                         if (last) {
-//                                                                                                                                                                             const quote = JSON.parse(last);
-//                                                                                                                                                                                 document.getElementById("quoteDisplay").innerHTML = `
-//                                                                                                                                                                                       <blockquote>"${quote.text}"</blockquote>
-	//                                                                                                                                                                                             <footer>- ${quote.category}</footer>
-	//                                                                                                                                                                                                 `;
-//                                                                                                                                                                                                   } else {
-//                                                                                                                                                                                                       showRandomQuote();
-	//                                                                                                                                                                                                         }
-	//                                                                                                                                                                                                         };
+//                                                                                                                                                                                                   // Load last quote and categories
+	//                                                                                                                                                                                                   window.onload = function () {
+//                                                                                                                                                                                                     populateCategories();
 //
+//                                                                                                                                                                                                       const last = sessionStorage.getItem("lastQuote");
+//                                                                                                                                                                                                         if (last) {
+//                                                                                                                                                                                                             const quote = JSON.parse(last);
+	//                                                                                                                                                                                                                 document.getElementById("quoteDisplay").innerHTML = `
+//                                                                                                                                                                                                                       <blockquote>"${quote.text}"</blockquote>
+//                                                                                                                                                                                                                             <footer>- ${quote.category}</footer>
+	//                                                                                                                                                                                                                                 `;
+	//                                                                                                                                                                                                                                   } else {
+//                                                                                                                                                                                                                                       showRandomQuote();
+//                                                                                                                                                                                                                                         }
+//
+//                                                                                                                                                                                                                                           document.getElementById("newQuote").addEventListener("click", showRandomQuote);
+	//                                                                                                                                                                                                                                           };
+	//
