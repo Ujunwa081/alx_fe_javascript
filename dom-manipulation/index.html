@@ -8,32 +8,30 @@
 	<body>
 		  <h1>Dynamic Quote Generator</h1>
 
-		    <!-- Category Filter Dropdown -->
-		      <select id="categoryFilter" onchange="filterQuotes()">
-			          <option value="all">All Categories</option>
-				      <!-- Categories will be added dynamically -->
-				        </select>
+		    <!-- Filter dropdown -->
+		      <label for="categoryFilter">Filter by Category:</label>
+		        <select id="categoryFilter" onchange="filterQuotes()">
+				    <option value="all">All Categories</option>
+				      </select>
 
-					  <!-- Display Area for Quote -->
-					    <div id="quoteDisplay"></div>
+				        <!-- Quote display -->
+					  <div id="quoteDisplay"></div>
+					    <button id="newQuote">Show New Quote</button>
 
-					      <!-- Buttons -->
-					        <button id="newQuote">Show New Quote</button>
+					      <!-- Add new quote -->
+					        <div>
+							    <input id="newQuoteText" type="text" placeholder="Enter a new quote" />
+							        <input id="newQuoteCategory" type="text" placeholder="Enter quote category" />
+								    <button onclick="addQuote()">Add Quote</button>
+								      </div>
 
-						  <!-- Add New Quote -->
-						    <div>
-							        <input id="newQuoteText" type="text" placeholder="Enter a new quote" />
-								    <input id="newQuoteCategory" type="text" placeholder="Enter quote category" />
-								        <button onclick="addQuote()">Add Quote</button>
-									  </div>
-
-									    <!-- Import & Export -->
-									      <div>
+								        <!-- Export & Import -->
+									  <div>
+										      <button onclick="exportToJsonFile()">Export Quotes</button>
 										          <input type="file" id="importFile" accept=".json" onchange="importFromJsonFile(event)" />
-											      <button onclick="exportToJsonFile()">Export Quotes</button>
-											        </div>
+											    </div>
 
-												  <script src="script.js"></script>
+											      <script src="script.js"></script>
 	</body>
 </html>
 
