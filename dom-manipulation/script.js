@@ -1,179 +1,134 @@
-// Initialize quotes from localStorage or default
-// let quotes = JSON.parse(localStorage.getItem('quotes')) || [
-//   { text: "The only way to do great work is to love what you do.", category: "Motivation" },
-//     { text: "Success is not final, failure is not fatal: it is the courage to continue that counts.", category: "Success" },
-//       { text: "In the middle of every difficulty lies opportunity.", category: "Wisdom" }
-//       ];
+const QUOTES_API_URL = 'https://mockapi.io/quotes'; // replace with actual mock API URL if provided
+//const LOCAL_STORAGE_KEY = 'quotes';
+//const SYNC_INTERVAL = 10000; // every 10 seconds
 //
-//       // Save quotes to local storage
-//       function saveQuotes() {
-//         localStorage.setItem("quotes", JSON.stringify(quotes));
-//         }
+//// Utility: Generate unique ID
+//function generateId() {
+//  return Date.now().toString();
+//  }
 //
-//         // Show a random quote
-//         function showRandomQuote() {
-//           const randomIndex = Math.floor(Math.random() * quotes.length);
-//             const quote = quotes[randomIndex];
-//               document.getElementById("quoteDisplay").innerHTML = `
-//                   <blockquote>"${quote.text}"</blockquote>
-//                       <footer>- ${quote.category}</footer>
-//                         `;
-//                           sessionStorage.setItem("lastQuote", JSON.stringify(quote));
-//                           }
+//  // Fetch quotes from the server
+//  async function fetchQuotesFromServer() {
+//    try {
+//        const response = await fetch(QUOTES_API_URL);
+//            const data = await response.json();
+//                return data;
+//                  } catch (error) {
+//                      console.error('Fetch error:', error);
+//                          return [];
+//                            }
+//                            }
 //
-//                           // Load quote on page load
-//                           window.onload = function () {
-//                             const last = sessionStorage.getItem("lastQuote");
-//                               if (last) {
-//                                   const quote = JSON.parse(last);
-//                                       document.getElementById("quoteDisplay").innerHTML = `
-//                                             <blockquote>"${quote.text}"</blockquote>
-//                                                   <footer>- ${quote.category}</footer>
-//                                                       `;
-//                                                         } else {
-//                                                             showRandomQuote();
-//                                                               }
+//                            // Post new quote to server
+//                            async function postQuoteToServer(quote) {
+//                              try {
+//                                  await fetch(QUOTES_API_URL, {
+//                                        method: 'POST',
+//                                              headers: { 'Content-Type': 'application/json' },
+//                                                    body: JSON.stringify(quote),
+//                                                        });
+//                                                          } catch (error) {
+//                                                              console.error('Post error:', error);
+//                                                                }
+//                                                                }
 //
-//                                                                 populateCategories();
-//                                                                   startSync();
-//                                                                   };
+//                                                                // Load quotes from localStorage
+//                                                                function loadLocalQuotes() {
+//                                                                  const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
+//                                                                    return stored ? JSON.parse(stored) : [];
+//                                                                    }
 //
-//                                                                   // Add new quote
-//                                                                   function addQuote() {
-//                                                                     const text = document.getElementById("newQuoteText").value.trim();
-//                                                                       const category = document.getElementById("newQuoteCategory").value.trim();
+//                                                                    // Save quotes to localStorage
+//                                                                    function saveLocalQuotes(quotes) {
+//                                                                      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(quotes));
+//                                                                      }
 //
-//                                                                         if (text && category) {
-//                                                                             const newQuote = { text, category };
-//                                                                                 quotes.push(newQuote);
-//                                                                                     saveQuotes();
-//                                                                                         showRandomQuote();
-//                                                                                             populateCategories();
-//                                                                                                 alert("Quote added!");
-//                                                                                                     postQuoteToServer(newQuote);
-//                                                                                                       } else {
-//                                                                                                           alert("Please enter both a quote and category.");
-//                                                                                                             }
+//                                                                      // Display quotes on the UI
+//                                                                      function displayQuotes(quotes) {
+//                                                                        const container = document.getElementById('quote-container');
+//                                                                          container.innerHTML = '';
+//                                                                            quotes.forEach((quote) => {
+//                                                                                const div = document.createElement('div');
+//                                                                                    div.className = 'quote';
+//                                                                                        div.textContent = `"${quote.text}" - ${quote.author}`;
+//                                                                                            container.appendChild(div);
+//                                                                                              });
+//                                                                                              }
 //
-//                                                                                                               document.getElementById("newQuoteText").value = "";
-//                                                                                                                 document.getElementById("newQuoteCategory").value = "";
-//                                                                                                                 }
+//                                                                                              // Add quote to UI and storage
+//                                                                                              function addQuote(author, text) {
+//                                                                                                const newQuote = {
+//                                                                                                    id: generateId(),
+//                                                                                                        author,
+//                                                                                                            text,
+//                                                                                                                timestamp: Date.now(),
+//                                                                                                                  };
+//                                                                                                                    const quotes = loadLocalQuotes();
+//                                                                                                                      quotes.push(newQuote);
+//                                                                                                                        saveLocalQuotes(quotes);
+//                                                                                                                          displayQuotes(quotes);
+//                                                                                                                            postQuoteToServer(newQuote);
+//                                                                                                                            }
 //
-//                                                                                                                 // Export quotes to JSON
-//                                                                                                                 function exportToJsonFile() {
-//                                                                                                                   const blob = new Blob([JSON.stringify(quotes, null, 2)], { type: "application/json" });
-//                                                                                                                     const url = URL.createObjectURL(blob);
-//                                                                                                                       const link = document.createElement("a");
-//                                                                                                                         link.href = url;
-//                                                                                                                           link.download = "quotes.json";
-//                                                                                                                             document.body.appendChild(link);
-//                                                                                                                               link.click();
-//                                                                                                                                 document.body.removeChild(link);
-//                                                                                                                                 }
+//                                                                                                                            // Conflict resolution logic
+//                                                                                                                            function mergeQuotes(local, server) {
+//                                                                                                                              const merged = [...server];
+//                                                                                                                                const serverIds = server.map((q) => q.id);
+//                                                                                                                                  local.forEach((q) => {
+//                                                                                                                                      if (!serverIds.includes(q.id)) {
+//                                                                                                                                            merged.push(q); // local-only quote
+//                                                                                                                                                  postQuoteToServer(q); // push to server
+//                                                                                                                                                      }
+//                                                                                                                                                        });
+//                                                                                                                                                          return merged;
+//                                                                                                                                                          }
 //
-//                                                                                                                                 // Import from JSON
-//                                                                                                                                 function importFromJsonFile(event) {
-//                                                                                                                                   const fileReader = new FileReader();
-//                                                                                                                                     fileReader.onload = function (event) {
-//                                                                                                                                         try {
-//                                                                                                                                               const importedQuotes = JSON.parse(event.target.result);
-//                                                                                                                                                     if (Array.isArray(importedQuotes)) {
-//                                                                                                                                                             quotes.push(...importedQuotes);
-//                                                                                                                                                                     saveQuotes();
-//                                                                                                                                                                             showRandomQuote();
-//                                                                                                                                                                                     populateCategories();
-//                                                                                                                                                                                             alert("Quotes imported successfully!");
-//                                                                                                                                                                                                   } else {
-//                                                                                                                                                                                                           alert("Invalid file format.");
-//                                                                                                                                                                                                                 }
-//                                                                                                                                                                                                                     } catch (e) {
-//                                                                                                                                                                                                                           alert("Error parsing JSON file.");
-//                                                                                                                                                                                                                               }
-//                                                                                                                                                                                                                                 };
-//                                                                                                                                                                                                                                   fileReader.readAsText(event.target.files[0]);
-//                                                                                                                                                                                                                                   }
+//                                                                                                                                                          // Sync local and server data
+//                                                                                                                                                          async function syncQuotes() {
+//                                                                                                                                                            const localQuotes = loadLocalQuotes();
+//                                                                                                                                                              const serverQuotes = await fetchQuotesFromServer();
 //
-	//                                                                                                                                                                                                                                   // Populate category filter
-//                                                                                                                                                                                                                                   function populateCategories() {
-//                                                                                                                                                                                                                                     const categoryFilter = document.getElementById("categoryFilter");
-	//                                                                                                                                                                                                                                       if (!categoryFilter) return;
-	//                                                                                                                                                                                                                                         const categories = [...new Set(quotes.map(q => q.category))];
-//                                                                                                                                                                                                                                           categoryFilter.innerHTML = `<option value="all">All Categories</option>`;
-//                                                                                                                                                                                                                                             categories.forEach(cat => {
-//                                                                                                                                                                                                                                                 const option = document.createElement("option");
-//                                                                                                                                                                                                                                                     option.value = cat;
-	//                                                                                                                                                                                                                                                         option.textContent = cat;
-	//                                                                                                                                                                                                                                                             categoryFilter.appendChild(option);
-//                                                                                                                                                                                                                                                               });
+	//                                                                                                                                                                const mergedQuotes = mergeQuotes(localQuotes, serverQuotes);
+	//                                                                                                                                                                  saveLocalQuotes(mergedQuotes);
+	//                                                                                                                                                                    displayQuotes(mergedQuotes);
 //
-//                                                                                                                                                                                                                                                                 const lastFilter = localStorage.getItem("lastFilter");
-//                                                                                                                                                                                                                                                                   if (lastFilter) {
-//                                                                                                                                                                                                                                                                       categoryFilter.value = lastFilter;
-	//                                                                                                                                                                                                                                                                           filterQuotes();
-	//                                                                                                                                                                                                                                                                             }
-//                                                                                                                                                                                                                                                                             }
+//                                                                                                                                                                      showNotification('Sync completed');
+//                                                                                                                                                                      }
 //
-//                                                                                                                                                                                                                                                                             // Filter quotes by category
-	//                                                                                                                                                                                                                                                                             function filterQuotes() {
-//                                                                                                                                                                                                                                                                               const selected = document.getElementById("categoryFilter").value;
-//                                                                                                                                                                                                                                                                                 localStorage.setItem("lastFilter", selected);
-//                                                                                                                                                                                                                                                                                   let filtered = selected === "all" ? quotes : quotes.filter(q => q.category === selected);
-//                                                                                                                                                                                                                                                                                     const randomIndex = Math.floor(Math.random() * filtered.length);
-//                                                                                                                                                                                                                                                                                       const quote = filtered[randomIndex];
-//                                                                                                                                                                                                                                                                                         document.getElementById("quoteDisplay").innerHTML = `
-	//                                                                                                                                                                                                                                                                                             <blockquote>"${quote.text}"</blockquote>
-	//                                                                                                                                                                                                                                                                                                 <footer>- ${quote.category}</footer>
-//                                                                                                                                                                                                                                                                                                   `;
-//                                                                                                                                                                                                                                                                                                   }
+	//                                                                                                                                                                      // Periodically check for updates
+//                                                                                                                                                                      setInterval(async () => {
+//                                                                                                                                                                        await syncQuotes();
+//                                                                                                                                                                          document.getElementById('sync-status').textContent = 'Last synced: ' + new Date().toLocaleTimeString();
+//                                                                                                                                                                          }, SYNC_INTERVAL);
 //
-//                                                                                                                                                                                                                                                                                                   // Fetch quotes from a mock API
-//                                                                                                                                                                                                                                                                                                   async function fetchQuotesFromServer() {
-//                                                                                                                                                                                                                                                                                                     try {
-//                                                                                                                                                                                                                                                                                                         const response = await fetch("https://jsonplaceholder.typicode.com/posts?_limit=5");
-	//                                                                                                                                                                                                                                                                                                             const data = await response.json();
-//                                                                                                                                                                                                                                                                                                                 const serverQuotes = data.map(d => ({
-//                                                                                                                                                                                                                                                                                                                       text: d.title,
-//                                                                                                                                                                                                                                                                                                                             category: "Server"
-//                                                                                                                                                                                                                                                                                                                                 }));
+//                                                                                                                                                                          // Notification system
+//                                                                                                                                                                          function showNotification(message) {
+//                                                                                                                                                                            const notify = document.getElementById('notification');
+//                                                                                                                                                                              notify.textContent = message;
+//                                                                                                                                                                                setTimeout(() => {
+	//                                                                                                                                                                                    notify.textContent = '';
+	//                                                                                                                                                                                      }, 3000);
+//                                                                                                                                                                                      }
+//
+//                                                                                                                                                                                      // Event: Form submit
+	//                                                                                                                                                                                      document.getElementById('quote-form').addEventListener('submit', (e) => {
+	//                                                                                                                                                                                        e.preventDefault();
+	//                                                                                                                                                                                          const author = document.getElementById('author').value;
+//                                                                                                                                                                                            const text = document.getElementById('text').value;
+//                                                                                                                                                                                              if (author && text) {
+//                                                                                                                                                                                                  addQuote(author, text);
+//                                                                                                                                                                                                      showNotification('Quote added locally and sent to server');
+//                                                                                                                                                                                                          document.getElementById('quote-form').reset();
+	//                                                                                                                                                                                                            }
+	//                                                                                                                                                                                                            });
+//
+//                                                                                                                                                                                                            // Event: Manual sync button
+//                                                                                                                                                                                                            document.getElementById('sync-button').addEventListener('click', syncQuotes);
+//
+	//                                                                                                                                                                                                            // On load
+//                                                                                                                                                                                                            document.addEventListener('DOMContentLoaded', async () => {
+//                                                                                                                                                                                                              const quotes = loadLocalQuotes();
+//                                                                                                                                                                                                                displayQuotes(quotes);
+//                                                                                                                                                                                                                  await syncQuotes();
+	//                                                                                                                                                                                                                  });
 	//
-//                                                                                                                                                                                                                                                                                                                                     const localTexts = quotes.map(q => q.text);
-//                                                                                                                                                                                                                                                                                                                                         let newQuotes = serverQuotes.filter(q => !localTexts.includes(q.text));
-//
-//                                                                                                                                                                                                                                                                                                                                             if (newQuotes.length > 0) {
-//                                                                                                                                                                                                                                                                                                                                                   quotes.push(...newQuotes);
-//                                                                                                                                                                                                                                                                                                                                                         saveQuotes();
-//                                                                                                                                                                                                                                                                                                                                                               populateCategories();
-//                                                                                                                                                                                                                                                                                                                                                                     document.getElementById("notification").textContent = "New quotes fetched from server!";
-//                                                                                                                                                                                                                                                                                                                                                                           setTimeout(() => {
-//                                                                                                                                                                                                                                                                                                                                                                                   document.getElementById("notification").textContent = "";
-//                                                                                                                                                                                                                                                                                                                                                                                         }, 4000);
-	//                                                                                                                                                                                                                                                                                                                                                                                             }
-//                                                                                                                                                                                                                                                                                                                                                                                               } catch (err) {
-//                                                                                                                                                                                                                                                                                                                                                                                                   console.error("Failed to fetch from server", err);
-//                                                                                                                                                                                                                                                                                                                                                                                                     }
-	//                                                                                                                                                                                                                                                                                                                                                                                                     }
-	//
-//                                                                                                                                                                                                                                                                                                                                                                                                     // Post quote to mock server (simulation)
-//                                                                                                                                                                                                                                                                                                                                                                                                     async function postQuoteToServer(quote) {
-//                                                                                                                                                                                                                                                                                                                                                                                                       try {
-//                                                                                                                                                                                                                                                                                                                                                                                                           await fetch("https://jsonplaceholder.typicode.com/posts", {
-//                                                                                                                                                                                                                                                                                                                                                                                                                 method: "POST",
-//                                                                                                                                                                                                                                                                                                                                                                                                                       body: JSON.stringify({
-//                                                                                                                                                                                                                                                                                                                                                                                                                               title: quote.text,
-//                                                                                                                                                                                                                                                                                                                                                                                                                                       body: quote.category,
-//                                                                                                                                                                                                                                                                                                                                                                                                                                               userId: 1,
-	//                                                                                                                                                                                                                                                                                                                                                                                                                                                     }),
-	//                                                                                                                                                                                                                                                                                                                                                                                                                                                           headers: { "Content-type": "application/json; charset=UTF-8" }
-//                                                                                                                                                                                                                                                                                                                                                                                                                                                               });
-//                                                                                                                                                                                                                                                                                                                                                                                                                                                                   console.log("Posted to server:", quote);
-//                                                                                                                                                                                                                                                                                                                                                                                                                                                                     } catch (err) {
-//                                                                                                                                                                                                                                                                                                                                                                                                                                                                         console.error("Failed to post to server", err);
-//                                                                                                                                                                                                                                                                                                                                                                                                                                                                           }
-//                                                                                                                                                                                                                                                                                                                                                                                                                                                                           }
-//
-//                                                                                                                                                                                                                                                                                                                                                                                                                                                                           // Start periodic sync
-//                                                                                                                                                                                                                                                                                                                                                                                                                                                                           function startSync() {
-//                                                                                                                                                                                                                                                                                                                                                                                                                                                                             fetchQuotesFromServer(); // Initial fetch
-//                                                                                                                                                                                                                                                                                                                                                                                                                                                                               setInterval(fetchQuotesFromServer, 30000); // Every 30s
-//                                                                                                                                                                                                                                                                                                                                                                                                                                                                               }
-//
